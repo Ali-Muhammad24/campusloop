@@ -215,6 +215,15 @@ textarea[aria-invalid='true'] {
   color: var(--danger);
 }
 
+.alert-success {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--success);
+  border-radius: var(--radius);
+  background: #f0fdf4;
+  color: var(--success);
+}
+
 /* ---------- Login / Signup ---------- */
 .auth-card {
   max-width: 460px;
