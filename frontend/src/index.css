@@ -178,6 +178,12 @@ textarea:focus {
   outline-offset: -1px;
 }
 
+/* FormInput sets aria-invalid when the field has an error. */
+input[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
 .field-error {
   color: var(--danger);
   font-size: 14px;
