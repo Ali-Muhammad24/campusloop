@@ -93,6 +93,17 @@ a {
   color: var(--white);
 }
 
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-role {
+  color: var(--text-light);
+  font-size: 14px;
+}
+
 /* ---------- Page container ---------- */
 .container {
   max-width: 1100px;
@@ -128,6 +139,11 @@ a {
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.btn-small {
+  padding: 4px 12px;
+  font-size: 14px;
 }
 
 .btn-danger {
@@ -187,4 +203,30 @@ textarea[aria-invalid='true'] {
 .field-error {
   color: var(--danger);
   font-size: 14px;
+}
+
+/* Error for the whole form, e.g. wrong email or password. */
+.alert-error {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+/* ---------- Login / Signup ---------- */
+.auth-card {
+  max-width: 460px;
+  margin: 24px auto;
+  padding: 24px;
+}
+
+.auth-card .form {
+  max-width: none;
+}
+
+.auth-switch {
+  margin: 16px 0 0;
+  color: var(--text-light);
 }

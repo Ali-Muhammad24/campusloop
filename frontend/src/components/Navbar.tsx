@@ -1,18 +1,35 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { logout, selectUser } from '../store/authSlice';
 
-// For now every link is shown. Later, links will depend on who is logged in.
-const links = [
+// Page links. Later, these will also depend on the user's role.
+const pageLinks = [
   { to: '/', label: 'Catalogue' },
   // Temporary link so the page can be opened from the navbar; normally you reach it from the Catalogue.
   { to: '/equipment/2', label: 'Item Details' },
   { to: '/my-requests', label: 'My Requests' },
   { to: '/admin/equipment', label: 'Manage Equipment' },
   { to: '/admin/dashboard', label: 'Admin Dashboard' },
+];
+
+// Only shown when nobody is logged in.
+const guestLinks = [
   { to: '/login', label: 'Login' },
   { to: '/signup', label: 'Sign Up' },
 ];
 
 function Navbar() {
+  const user = useAppSelector(selectUser);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const links = user ? pageLinks : [...pageLinks, ...guestLinks];
+
+  function handleLogout() {
+    dispatch(logout());
+    navigate('/login');
+  }
+
   return (
     <header className="navbar">
       <div className="navbar-inner">
@@ -28,6 +45,16 @@ function Navbar() {
             </NavLink>
           ))}
         </nav>
+        {user && (
+          <div className="navbar-user">
+            <span>
+              {user.name} <span className="navbar-role">({user.role})</span>
+            </span>
+            <button type="button" className="btn btn-small" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
