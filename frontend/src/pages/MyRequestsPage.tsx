@@ -6,17 +6,7 @@ import { useAppSelector } from '../store/hooks';
 import { selectUser } from '../store/authSlice';
 import Spinner from '../components/Spinner';
 import StatusBadge from '../components/StatusBadge';
-
-// Turns "2026-11-14" into "14 Nov 2026".
-// The parts are passed separately so the date isn't shifted by the time zone.
-function formatDate(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
+import { formatDate } from '../utils/formatDate';
 
 function MyRequestsPage() {
   // ProtectedRoute makes sure a Student is logged in before this page shows.
