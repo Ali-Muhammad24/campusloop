@@ -2,20 +2,21 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logout, selectUser } from '../store/authSlice';
 
-// Page links. Later, these will also depend on the user's role.
-const pageLinks = [
-  { to: '/', label: 'Catalogue' },
-  // Temporary link so the page can be opened from the navbar; normally you reach it from the Catalogue.
-  { to: '/equipment/2', label: 'Item Details' },
-  { to: '/my-requests', label: 'My Requests' },
-  { to: '/admin/equipment', label: 'Manage Equipment' },
-  { to: '/admin/dashboard', label: 'Admin Dashboard' },
-];
-
-// Only shown when nobody is logged in.
+// Links for each kind of visitor. (Item Details isn't here: you open it from a Catalogue card.)
 const guestLinks = [
+  { to: '/', label: 'Catalogue' },
   { to: '/login', label: 'Login' },
   { to: '/signup', label: 'Sign Up' },
+];
+
+const studentLinks = [
+  { to: '/', label: 'Catalogue' },
+  { to: '/my-requests', label: 'My Requests' },
+];
+
+const adminLinks = [
+  { to: '/admin/equipment', label: 'Manage Equipment' },
+  { to: '/admin/dashboard', label: 'Admin Dashboard' },
 ];
 
 function Navbar() {
@@ -23,7 +24,7 @@ function Navbar() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const links = user ? pageLinks : [...pageLinks, ...guestLinks];
+  const links = !user ? guestLinks : user.role === 'Admin' ? adminLinks : studentLinks;
 
   function handleLogout() {
     dispatch(logout());

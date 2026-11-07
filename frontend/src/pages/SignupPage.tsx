@@ -65,9 +65,13 @@ function SignupPage() {
     try {
       // api.signup always creates a Student account.
       const user = await api.signup(values.name, values.email, values.password);
-      dispatch(login(user));
       setSuccess(true);
-      redirectTimer.current = window.setTimeout(() => navigate('/', { replace: true }), REDIRECT_DELAY_MS);
+      // Log in only when leaving: Signup is a guest-only page, so logging in now would
+      // redirect straight away and the success message would never show.
+      redirectTimer.current = window.setTimeout(() => {
+        dispatch(login(user));
+        navigate('/', { replace: true });
+      }, REDIRECT_DELAY_MS);
     } catch (error) {
       setSignupError(error instanceof Error ? error.message : 'Sign up failed. Please try again.');
       setLoading(false);
