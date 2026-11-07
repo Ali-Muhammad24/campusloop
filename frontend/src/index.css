@@ -333,6 +333,53 @@ textarea[aria-invalid='true'] {
   margin: 0 0 12px;
 }
 
+/* ---------- Item Details ---------- */
+.back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.item-details,
+.item-request {
+  max-width: 720px;
+  padding: 24px;
+}
+
+.item-details {
+  margin-bottom: 16px;
+}
+
+.item-details h1 {
+  margin-bottom: 4px;
+}
+
+.item-details-category {
+  margin: 0 0 12px;
+  color: var(--text-light);
+}
+
+.item-details-description {
+  margin: 16px 0 0;
+}
+
+.item-request .form {
+  max-width: none;
+}
+
+/* Neutral message box, e.g. "log in to request". */
+.alert-info {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
 /* ---------- Login / Signup ---------- */
 .auth-card {
   max-width: 460px;
