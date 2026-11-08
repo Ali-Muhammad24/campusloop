@@ -16,11 +16,14 @@ function ItemDetailsPage() {
   const user = useAppSelector(selectUser);
 
   // The loaded item, together with the id it was loaded for (item is null if it wasn't found).
-  const [result, setResult] = useState<{ id: number; item: Equipment | null } | null>(null);
+  // "error" is set when loading failed for another reason, e.g. a network problem.
+  const [result, setResult] = useState<{ id: number; item: Equipment | null; error?: string } | null>(null);
 
   // Still loading until we have a result for the id that is in the URL right now.
   const loading = validId && result?.id !== itemId;
-  const item = validId && result?.id === itemId ? result.item : null;
+  const current = validId && result?.id === itemId ? result : null;
+  const item = current?.item ?? null;
+  const loadError = current?.error ?? '';
 
   // Load the item whenever the id in the URL changes.
   useEffect(() => {
@@ -32,9 +35,15 @@ function ItemDetailsPage() {
       .then((data) => {
         if (!ignore) setResult({ id: itemId, item: data });
       })
-      .catch(() => {
-        // The mock API only throws "not found", so this shows the "not found" message.
-        if (!ignore) setResult({ id: itemId, item: null });
+      .catch((error: unknown) => {
+        if (ignore) return;
+        const text = error instanceof Error ? error.message : '';
+        // "Not found" shows the "Item not found" box; any other problem shows a red error.
+        if (/not found/i.test(text)) {
+          setResult({ id: itemId, item: null });
+        } else {
+          setResult({ id: itemId, item: null, error: text || 'Could not load this item. Please try again.' });
+        }
       });
 
     return () => {
@@ -49,6 +58,17 @@ function ItemDetailsPage() {
   );
 
   if (loading) return <Spinner label="Loading item..." />;
+
+  if (loadError) {
+    return (
+      <>
+        {backLink}
+        <p className="alert-error" role="alert">
+          {loadError}
+        </p>
+      </>
+    );
+  }
 
   // Inactive items are hidden from students, so they count as "not found" too.
   if (!item || !item.isActive) {

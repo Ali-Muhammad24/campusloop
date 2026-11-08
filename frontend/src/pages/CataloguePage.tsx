@@ -66,6 +66,18 @@ function CataloguePage() {
     );
   }
 
+  // Nothing to search or filter yet, so show a plain message instead of the filter bar.
+  if (items.length === 0) {
+    return (
+      <>
+        <h1>Equipment Catalogue</h1>
+        <div className="card empty-message">
+          <p>No equipment is available yet. Please check back later.</p>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <h1>Equipment Catalogue</h1>
