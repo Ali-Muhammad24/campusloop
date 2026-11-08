@@ -66,24 +66,30 @@ function MyRequestsPage() {
         </div>
       ) : (
         <ul className="request-list">
-          {requests.map((request) => (
-            <li key={request.id} className="card request-card">
-              <div className="request-card-header">
-                <h2 className="request-card-name">{equipmentNames[request.equipmentId] ?? 'Unknown item'}</h2>
-                <StatusBadge status={request.status} />
-              </div>
-              <dl className="request-card-details">
-                <div>
-                  <dt>Purpose</dt>
-                  <dd>{request.purpose}</dd>
+          {requests.map((request) => {
+            const itemName = equipmentNames[request.equipmentId] ?? 'Unknown item';
+            return (
+              <li key={request.id} className="card request-card">
+                <div className="request-card-header">
+                  {/* One line; long names end with "..." and show in full on hover. */}
+                  <h2 className="request-card-name" title={itemName}>
+                    {itemName}
+                  </h2>
+                  <StatusBadge status={request.status} />
                 </div>
-                <div>
-                  <dt>Expected return</dt>
-                  <dd>{formatDate(request.expectedReturnDate)}</dd>
-                </div>
-              </dl>
-            </li>
-          ))}
+                <dl className="request-card-details">
+                  <div>
+                    <dt>Purpose</dt>
+                    <dd>{request.purpose}</dd>
+                  </div>
+                  <div>
+                    <dt>Expected return</dt>
+                    <dd className="request-card-date">{formatDate(request.expectedReturnDate)}</dd>
+                  </div>
+                </dl>
+              </li>
+            );
+          })}
         </ul>
       )}
     </>

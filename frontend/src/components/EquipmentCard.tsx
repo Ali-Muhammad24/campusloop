@@ -12,8 +12,13 @@ function EquipmentCard({ item }: EquipmentCardProps) {
 
   return (
     <Link to={`/equipment/${item.id}`} className="card equipment-card">
-      <h3 className="equipment-card-name">{item.name}</h3>
-      <p className="equipment-card-category">{item.category}</p>
+      {/* One line each; long text ends with "..." and shows in full on hover. */}
+      <h3 className="equipment-card-name" title={item.name}>
+        {item.name}
+      </h3>
+      <p className="equipment-card-category" title={item.category}>
+        {item.category}
+      </p>
       <span className={badgeClass}>{item.availability}</span>
     </Link>
   );

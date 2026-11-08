@@ -148,8 +148,12 @@ function AdminDashboardPage() {
         </div>
       ) : (
         <>
-          <div className="filter-bar">
-            <div className="form-group">
+          {/* Count on the left, compact Status filter on the right (stacked on phones). */}
+          <div className="table-toolbar">
+            <p className="result-count">
+              Showing {visibleRequests.length} of {requests.length} requests
+            </p>
+            <div className="form-group table-toolbar-filter">
               <label htmlFor="dashboard-status">Status</label>
               <select
                 id="dashboard-status"
@@ -165,10 +169,6 @@ function AdminDashboardPage() {
             </div>
           </div>
 
-          <p className="result-count">
-            Showing {visibleRequests.length} of {requests.length} requests
-          </p>
-
           {visibleRequests.length === 0 ? (
             <div className="card empty-message">
               <p>No {statusFilter.toLowerCase()} requests.</p>
@@ -181,12 +181,13 @@ function AdminDashboardPage() {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Student</th>
-                    <th>Equipment</th>
+                    {/* "col-fit" columns are only as wide as their content; Purpose gets the rest. */}
+                    <th className="col-fit">Student</th>
+                    <th className="col-fit">Equipment</th>
                     <th>Purpose</th>
-                    <th>Return by</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th className="col-fit">Return by</th>
+                    <th className="col-fit">Status</th>
+                    <th className="col-fit">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -195,29 +196,46 @@ function AdminDashboardPage() {
                     // Another request already has this item, so this one can't be approved yet.
                     const itemBorrowed = item?.availability === 'Borrowed';
                     const anyBusy = busyId !== null;
+                    const studentName = studentNames[request.studentId] ?? 'Unknown student';
+                    const itemName = item?.name ?? 'Unknown item';
 
                     return (
                       <tr key={request.id}>
-                        <td data-label="Student">{studentNames[request.studentId] ?? 'Unknown student'}</td>
-                        <td data-label="Equipment">{item?.name ?? 'Unknown item'}</td>
+                        {/* Long names are cut off with "..."; hover shows the full name. */}
+                        <td data-label="Student" className="col-fit">
+                          <span className="cell-truncate" title={studentName}>
+                            {studentName}
+                          </span>
+                        </td>
+                        <td data-label="Equipment" className="col-fit">
+                          <span className="cell-truncate" title={itemName}>
+                            {itemName}
+                          </span>
+                        </td>
                         <td data-label="Purpose">{request.purpose}</td>
-                        <td data-label="Return by">{formatDate(request.expectedReturnDate)}</td>
-                        <td data-label="Status">
+                        <td data-label="Return by" className="col-fit">
+                          {formatDate(request.expectedReturnDate)}
+                        </td>
+                        <td data-label="Status" className="col-fit">
                           <StatusBadge status={request.status} />
                         </td>
-                        <td data-label="Actions">
+                        <td data-label="Actions" className="col-fit">
                           <div>
                             {request.status === 'Pending' && (
                               <>
                                 <div className="table-actions">
-                                  <button
-                                    type="button"
-                                    className="btn btn-small btn-success"
-                                    onClick={() => handleAction(request, 'approve')}
-                                    disabled={anyBusy || itemBorrowed}
-                                  >
-                                    Approve
-                                  </button>
+                                  {/* No Approve while the item is Borrowed. It reappears as soon as the
+                                      item is marked Returned, because that updates `equipment` above. */}
+                                  {!itemBorrowed && (
+                                    <button
+                                      type="button"
+                                      className="btn btn-small btn-success"
+                                      onClick={() => handleAction(request, 'approve')}
+                                      disabled={anyBusy}
+                                    >
+                                      Approve
+                                    </button>
+                                  )}
                                   <button
                                     type="button"
                                     className="btn btn-small btn-danger"
@@ -227,9 +245,6 @@ function AdminDashboardPage() {
                                     Reject
                                   </button>
                                 </div>
-                                {itemBorrowed && (
-                                  <p className="action-note">Item is currently borrowed. Approve it once it's returned.</p>
-                                )}
                               </>
                             )}
                             {request.status === 'Approved' && (

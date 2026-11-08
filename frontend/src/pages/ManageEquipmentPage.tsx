@@ -163,8 +163,8 @@ function ManageEquipmentPage() {
       <h1>Manage Equipment</h1>
 
       <section className="card manage-form-card">
-        <h2>{editingItem ? `Edit "${editingItem.name}"` : 'Add equipment'}</h2>
         <EquipmentForm
+          title={editingItem ? 'Edit equipment' : 'Add equipment'}
           // A new key gives a fresh form: when switching items, or after adding one.
           key={editingItem ? `edit-${editingItem.id}` : `add-${formKey}`}
           initialValues={editingItem ? toData(editingItem) : undefined}
@@ -192,26 +192,40 @@ function ManageEquipmentPage() {
           <table className="data-table">
             <thead>
               <tr>
+                {/* "col-fit" columns are only as wide as their content; Name gets the rest. */}
                 <th>Name</th>
-                <th>Category</th>
-                <th>Availability</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th className="col-fit">Category</th>
+                <th className="col-fit">Availability</th>
+                <th className="col-fit">Status</th>
+                <th className="col-fit">Actions</th>
               </tr>
             </thead>
             <tbody>
               {items.map((item) => (
                 <Fragment key={item.id}>
                   <tr className={item.isActive ? undefined : 'row-inactive'}>
-                    <td data-label="Name">{item.name}</td>
-                    <td data-label="Category">{item.category}</td>
-                    <td data-label="Availability">
+                    {/* Long names are cut off with "..."; hover shows the full text. */}
+                    <td data-label="Name">
+                      <span className="cell-truncate cell-truncate-wide" title={item.name}>
+                        {item.name}
+                      </span>
+                    </td>
+                    <td data-label="Category" className="col-fit">
+                      <span className="cell-truncate" title={item.category}>
+                        {item.category}
+                      </span>
+                    </td>
+                    <td data-label="Availability" className="col-fit">
                       <span className={`badge ${item.availability === 'Available' ? 'badge-available' : 'badge-borrowed'}`}>
                         {item.availability}
                       </span>
                     </td>
-                    <td data-label="Status">{item.isActive ? 'Active' : 'Inactive'}</td>
-                    <td data-label="Actions">
+                    <td data-label="Status" className="col-fit">
+                      <span className={`badge ${item.isActive ? 'badge-active' : 'badge-inactive'}`}>
+                        {item.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td data-label="Actions" className="col-fit">
                       <div className="table-actions">
                         <button type="button" className="btn btn-small" onClick={() => startEdit(item)} disabled={anyBusy}>
                           Edit

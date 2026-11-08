@@ -18,6 +18,7 @@ type EquipmentFormErrors = Partial<Record<'name' | 'category' | 'description', s
 const emptyValues: EquipmentFormValues = { name: '', category: '', description: '', availability: 'Available' };
 
 interface EquipmentFormProps {
+  title: string; // heading shown in the form's top row, next to the buttons
   initialValues?: EquipmentFormValues; // filled in when editing
   submitLabel: string;
   saving: boolean;
@@ -25,7 +26,7 @@ interface EquipmentFormProps {
   onCancel?: () => void; // shown as a Cancel button when set (edit mode)
 }
 
-function EquipmentForm({ initialValues = emptyValues, submitLabel, saving, onSubmit, onCancel }: EquipmentFormProps) {
+function EquipmentForm({ title, initialValues = emptyValues, submitLabel, saving, onSubmit, onCancel }: EquipmentFormProps) {
   const [values, setValues] = useState<EquipmentFormValues>(initialValues);
   const [errors, setErrors] = useState<EquipmentFormErrors>({});
   const availabilityId = useId();
@@ -56,7 +57,11 @@ function EquipmentForm({ initialValues = emptyValues, submitLabel, saving, onSub
   }
 
   return (
-    <form className="form" onSubmit={handleSubmit} noValidate>
+    // Desktop: heading on the left with the buttons on the right of the same row, then
+    // Name | Category | Availability, then Description full width.
+    // Phones: one column, buttons full width at the bottom. See .equipment-form in index.css.
+    <form className="form equipment-form" onSubmit={handleSubmit} noValidate>
+      <h2 className="equipment-form-title">{title}</h2>
       <FormInput
         label="Name"
         name="name"
@@ -75,15 +80,6 @@ function EquipmentForm({ initialValues = emptyValues, submitLabel, saving, onSub
         placeholder="e.g. Cameras"
         disabled={saving}
       />
-      <FormInput
-        label="Description"
-        name="description"
-        value={values.description}
-        onChange={handleChange}
-        error={errors.description}
-        multiline
-        disabled={saving}
-      />
       {/* FormInput has no dropdown, so this one is written out. A value is always selected. */}
       <div className="form-group">
         <label htmlFor={availabilityId}>Availability</label>
@@ -98,16 +94,29 @@ function EquipmentForm({ initialValues = emptyValues, submitLabel, saving, onSub
           <option value="Borrowed">Borrowed</option>
         </select>
       </div>
+      <div className="form-span-full">
+        <FormInput
+          label="Description"
+          name="description"
+          value={values.description}
+          onChange={handleChange}
+          error={errors.description}
+          multiline
+          disabled={saving}
+        />
+      </div>
 
+      {/* Last in the form (so it's last in tab order and at the bottom on phones);
+          on desktop, CSS moves it up into the heading row. Submit button comes last. */}
       <div className="form-actions">
-        <button type="submit" className="btn" disabled={saving}>
-          {saving ? 'Saving...' : submitLabel}
-        </button>
         {onCancel && (
           <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={saving}>
             Cancel
           </button>
         )}
+        <button type="submit" className="btn" disabled={saving}>
+          {saving ? 'Saving...' : submitLabel}
+        </button>
       </div>
     </form>
   );

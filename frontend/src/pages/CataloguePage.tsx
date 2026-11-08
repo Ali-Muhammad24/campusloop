@@ -3,6 +3,7 @@ import type { Availability, Equipment } from '../types';
 import * as api from '../services/api';
 import EquipmentCard from '../components/EquipmentCard';
 import Spinner from '../components/Spinner';
+import { FilterIcon } from '../components/Icons';
 
 type AvailabilityFilter = 'All' | Availability;
 
@@ -14,6 +15,9 @@ function CataloguePage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [availability, setAvailability] = useState<AvailabilityFilter>('All');
+
+  // Mobile only: whether the Category/Availability dropdowns are shown. On desktop they always show.
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Load the equipment once when the page opens.
   useEffect(() => {
@@ -50,6 +54,9 @@ function CataloguePage() {
       (availability === 'All' || item.availability === availability),
   );
 
+  // Shown on the mobile Filters button so users know a dropdown filter is on.
+  const activeFilterCount = (category !== 'All' ? 1 : 0) + (availability !== 'All' ? 1 : 0);
+
   function clearFilters() {
     setSearch('');
     setCategory('All');
@@ -82,39 +89,57 @@ function CataloguePage() {
     <>
       <h1>Equipment Catalogue</h1>
 
+      {/* On desktop all three fields sit in one row. On mobile the search box and a Filters
+          button share a row, and the dropdowns slide open below when it's tapped (see index.css). */}
       <div className="filter-bar">
-        <div className="form-group filter-search">
-          <label htmlFor="catalogue-search">Search</label>
-          <input
-            id="catalogue-search"
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by name"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="catalogue-category">Category</label>
-          <select id="catalogue-category" value={category} onChange={(event) => setCategory(event.target.value)}>
-            <option value="All">All categories</option>
-            {categories.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label htmlFor="catalogue-availability">Availability</label>
-          <select
-            id="catalogue-availability"
-            value={availability}
-            onChange={(event) => setAvailability(event.target.value as AvailabilityFilter)}
+        <div className="filter-top">
+          <div className="form-group filter-search">
+            <label htmlFor="catalogue-search">Search</label>
+            <input
+              id="catalogue-search"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search by name"
+            />
+          </div>
+          <button
+            type="button"
+            className={activeFilterCount > 0 ? 'btn btn-secondary filter-toggle filter-toggle-active' : 'btn btn-secondary filter-toggle'}
+            aria-expanded={filtersOpen}
+            aria-controls="catalogue-filters"
+            onClick={() => setFiltersOpen((open) => !open)}
           >
-            <option value="All">All</option>
-            <option value="Available">Available</option>
-            <option value="Borrowed">Borrowed</option>
-          </select>
+            <FilterIcon />
+            {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
+          </button>
+        </div>
+        <div id="catalogue-filters" className={filtersOpen ? 'filter-extra filter-extra-open' : 'filter-extra'}>
+          <div className="filter-extra-inner">
+            <div className="form-group">
+              <label htmlFor="catalogue-category">Category</label>
+              <select id="catalogue-category" value={category} onChange={(event) => setCategory(event.target.value)}>
+                <option value="All">All categories</option>
+                {categories.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="catalogue-availability">Availability</label>
+              <select
+                id="catalogue-availability"
+                value={availability}
+                onChange={(event) => setAvailability(event.target.value as AvailabilityFilter)}
+              >
+                <option value="All">All</option>
+                <option value="Available">Available</option>
+                <option value="Borrowed">Borrowed</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 

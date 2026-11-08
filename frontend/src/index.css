@@ -1,15 +1,56 @@
-/* ---------- Colours and fonts ---------- */
+/* ---------- Theme ----------
+   Change the colours here and the whole app follows. */
 :root {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
+  /* Main palette */
+  --bg: #f4f8ff; /* page background */
+  --surface: #ffffff; /* cards, navbar, forms */
+  --primary: #2563eb; /* buttons, links, active nav link, focus outlines */
+  --primary-hover: #1d4ed8; /* slightly darker primary for hover */
+  --accent: #dbeafe; /* light highlights, input backgrounds, hover states, soft badges */
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --on-primary: #ffffff; /* text on primary-coloured backgrounds */
+
+  /* Lines and depth */
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --shadow-sm: 0 1px 2px rgba(30, 41, 59, 0.06);
+  --shadow: 0 1px 3px rgba(30, 41, 59, 0.06), 0 4px 12px rgba(30, 41, 59, 0.05);
+  --shadow-hover: 0 4px 8px rgba(30, 41, 59, 0.06), 0 10px 24px rgba(37, 99, 235, 0.12);
+  --radius: 12px; /* cards */
+  --radius-sm: 8px; /* buttons, inputs */
+  --control-height: 44px; /* dropdowns and the buttons lined up next to them */
+
+  /* Feedback colours */
   --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --danger-soft: #fef2f2;
   --success: #16a34a;
-  --text: #1f2937;
-  --text-light: #6b7280;
-  --bg: #f3f4f6;
-  --white: #ffffff;
-  --border: #d1d5db;
-  --radius: 8px;
+  --success-hover: #15803d;
+  --success-soft: #f0fdf4;
+
+  /* Badges: background / text pairs, each status its own colour */
+  --badge-available-bg: #dcfce7;
+  --badge-available-text: #166534;
+  --badge-borrowed-bg: #e2e8f0;
+  --badge-borrowed-text: #334155;
+  --badge-pending-bg: #fef3c7;
+  --badge-pending-text: #92400e;
+  --badge-approved-bg: #dcfce7;
+  --badge-approved-text: #166534;
+  --badge-rejected-bg: #fee2e2;
+  --badge-rejected-text: #991b1b;
+  --badge-returned-bg: #ede9fe;
+  --badge-returned-text: #5b21b6;
+  --badge-active-bg: #dbeafe;
+  --badge-active-text: #1e40af;
+  --badge-inactive-bg: #f1f5f9;
+  --badge-inactive-text: #475569;
+
+  /* Footer */
+  --footer-bg: #1e293b;
+  --footer-text: #ffffff;
+  --footer-text-muted: #cbd5e1;
 
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
   font-size: 16px;
@@ -25,6 +66,7 @@
 body {
   margin: 0;
   background: var(--bg);
+  color: var(--text);
 }
 
 h1,
@@ -32,11 +74,13 @@ h2,
 h3 {
   margin: 0 0 16px;
   line-height: 1.2;
+  color: var(--text);
   overflow-wrap: anywhere; /* long names wrap instead of making the page scroll sideways */
 }
 
 h1 {
   font-size: 28px;
+  letter-spacing: -0.01em;
 }
 
 h2 {
@@ -47,10 +91,31 @@ a {
   color: var(--primary);
 }
 
+a:hover {
+  color: var(--primary-hover);
+}
+
+/* Keyboard focus ring for links and buttons. */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ---------- App shell ----------
+   Full-height column: navbar, page, footer. The page grows to fill spare space,
+   which keeps the footer at the bottom on short pages. */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 /* ---------- Navbar ---------- */
 .navbar {
-  background: var(--white);
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .navbar-inner {
@@ -58,61 +123,125 @@ a {
   margin: 0 auto;
   padding: 12px 16px;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* one row: logo on the left, everything else on the right */
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 24px;
 }
 
 .navbar-brand {
-  font-size: 20px;
-  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--primary);
   text-decoration: none;
 }
 
+.navbar-brand:hover {
+  color: var(--primary-hover);
+}
+
 .navbar-links {
   display: flex;
-  flex-wrap: wrap;
+  flex-shrink: 0; /* links never squeeze or wrap; the name gives way instead */
+  flex-wrap: nowrap;
   gap: 4px;
 }
 
 .navbar-link {
-  padding: 6px 10px;
-  border-radius: var(--radius);
+  white-space: nowrap;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
   color: var(--text);
+  font-weight: 500;
   text-decoration: none;
+  transition: background 0.15s, color 0.15s;
 }
 
 .navbar-link:hover {
-  background: var(--bg);
+  background: var(--accent);
+  color: var(--text);
 }
 
 /* NavLink adds "active" to the current page's link. */
-.navbar-link.active {
+.navbar-link.active,
+.navbar-link.active:hover {
   background: var(--primary);
-  color: var(--white);
+  color: var(--on-primary);
 }
 
+/* Desktop: links + user section grouped together on the right side of the navbar. */
+.navbar-menu {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0; /* lets a long name shrink instead of pushing the row wider */
+  margin-left: auto;
+}
+
+/* Name, role and Logout, set off from the links by a thin divider. */
 .navbar-user {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  min-width: 0;
+  padding-left: 20px;
+  border-left: 1px solid var(--border);
 }
 
-.navbar-user > span {
-  overflow-wrap: anywhere; /* long names wrap instead of overflowing */
+.navbar-user-info {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+/* Long names stop at a max width and end with "..."; the full name shows on hover. */
+.navbar-user-name {
+  min-width: 40px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
 }
 
 .navbar-role {
-  color: var(--text-light);
+  flex-shrink: 0;
+  color: var(--text-muted);
   font-size: 14px;
+  font-weight: 400;
 }
 
-/* On wider screens the menu wrapper doesn't affect the layout: the links and the
-   user section sit in the navbar row exactly as before. */
-.navbar-menu {
-  display: contents;
+.navbar-user .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Narrower desktops (e.g. small laptops, tablets in landscape): tighten spacing
+   so the Admin links, name and Logout still fit on one row. */
+@media (min-width: 721px) and (max-width: 960px) {
+  .navbar-inner {
+    gap: 16px;
+  }
+
+  .navbar-menu {
+    gap: 12px;
+  }
+
+  .navbar-user {
+    gap: 10px;
+    padding-left: 12px;
+  }
+
+  .navbar-link {
+    padding: 8px 10px;
+  }
+
+  .navbar-user-name {
+    max-width: 120px;
+  }
 }
 
 /* The ☰ button only shows on small screens. */
@@ -120,82 +249,329 @@ a {
   display: none;
   padding: 4px 10px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--white);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
   color: var(--text);
   font-size: 20px;
   line-height: 1.2;
   cursor: pointer;
+  transition: background 0.15s;
 }
 
 .navbar-toggle:hover {
-  background: var(--bg);
+  background: var(--accent);
 }
 
-/* Small screens: links, user name and Logout move into a menu that opens with ☰. */
+/* ---------- Mobile side drawer ----------
+   Hidden on desktop. On small screens ☰ opens it from the left, over the page. */
+.drawer,
+.drawer-backdrop {
+  display: none;
+}
+
 @media (max-width: 720px) {
   .navbar-toggle {
     display: block;
   }
 
+  /* The desktop links and user section live in the drawer instead. */
   .navbar-menu {
     display: none;
-    width: 100%; /* drops onto its own row under the brand and ☰ */
-    flex-direction: column;
-    gap: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
   }
 
-  .navbar-menu-open {
+  /* Dark see-through layer over the page; tapping it closes the drawer. */
+  .drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(15, 23, 42, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+  }
+
+  .drawer-backdrop-open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.25s ease;
+  }
+
+  .drawer {
     display: flex;
-  }
-
-  .navbar-links {
     flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 101;
+    width: min(300px, 82vw);
+    background: var(--surface);
+    box-shadow: 4px 0 24px rgba(15, 23, 42, 0.18);
+    overflow-y: auto;
+    transform: translateX(-100%);
+    visibility: hidden; /* keeps the hidden links out of keyboard focus */
+    transition: transform 0.25s ease, visibility 0s linear 0.25s;
   }
 
-  .navbar-link {
-    padding: 10px 12px; /* bigger tap area */
+  .drawer-open {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.25s ease;
   }
 
-  .navbar-user {
+  .drawer-header {
+    padding: 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .drawer-header-top {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    padding: 8px 12px 0;
+    gap: 12px;
+  }
+
+  .drawer-brand {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .drawer-close:hover {
+    background: var(--accent);
+  }
+
+  .drawer-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .drawer-avatar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .drawer-user-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .drawer-user-name {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .drawer-user-role {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .drawer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+  }
+
+  /* One row per link: icon on the left, label next to it. */
+  .drawer-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-weight: 500;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .drawer-link .icon {
+    flex-shrink: 0;
+    color: var(--text-muted);
+  }
+
+  .drawer-link:hover {
+    background: var(--accent);
+    color: var(--text);
+  }
+
+  /* NavLink adds "active" to the current page's link. */
+  .drawer-link.active,
+  .drawer-link.active:hover {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+
+  .drawer-link.active .icon {
+    color: var(--on-primary);
+  }
+
+  .drawer-footer {
+    margin-top: auto; /* Logout sits at the bottom of the drawer */
+    padding: 12px;
     border-top: 1px solid var(--border);
+  }
+
+  .drawer-logout,
+  .drawer-logout .icon {
+    color: var(--danger);
+  }
+
+  .drawer-logout:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+}
+
+@media (max-width: 720px) and (prefers-reduced-motion: reduce) {
+  .drawer,
+  .drawer-backdrop {
+    transition: none;
   }
 }
 
 /* ---------- Page container ---------- */
 .container {
+  flex: 1; /* fills spare height so the footer stays at the bottom */
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  background: var(--footer-bg);
+  color: var(--footer-text);
+}
+
+.footer-inner {
   max-width: 1100px;
   margin: 0 auto;
   padding: 24px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.footer-brand,
+.footer-credits {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.footer-credits {
+  text-align: right;
+}
+
+.footer-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.footer-tagline,
+.footer-copy {
+  color: var(--footer-text-muted);
+  font-size: 14px;
+}
+
+/* Compact two-line footer, only on small screens. */
+.footer-compact {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .footer-inner {
+    display: none;
+  }
+
+  .footer-compact {
+    display: block;
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .footer-compact p {
+    margin: 0;
+  }
+
+  .footer-compact-credits {
+    color: var(--footer-text-muted);
+    font-size: 12px;
+  }
 }
 
 /* ---------- Cards ---------- */
 .card {
-  background: var(--white);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px;
+  box-shadow: var(--shadow);
+  padding: 20px;
 }
 
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-block;
-  padding: 8px 16px;
-  border: none;
-  border-radius: var(--radius);
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
   background: var(--primary);
-  color: var(--white);
+  color: var(--on-primary);
+  font: inherit;
   font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
   cursor: pointer;
   text-decoration: none;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .btn:hover {
-  background: var(--primary-dark);
+  background: var(--primary-hover);
+  color: var(--on-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn:disabled {
@@ -204,7 +580,7 @@ a {
 }
 
 .btn-small {
-  padding: 4px 12px;
+  padding: 5px 12px;
   font-size: 14px;
 }
 
@@ -212,33 +588,46 @@ a {
   background: var(--danger);
 }
 
+.btn-danger:hover {
+  background: var(--danger-hover);
+}
+
 .btn-success {
   background: var(--success);
 }
 
-.btn-danger:hover,
 .btn-success:hover {
-  filter: brightness(0.9);
+  background: var(--success-hover);
 }
 
 /* A quieter button, e.g. Cancel or Mark inactive. */
 .btn-secondary {
-  background: var(--white);
+  background: var(--surface);
   color: var(--text);
-  border: 1px solid var(--border);
+  border-color: var(--border-strong);
 }
 
 .btn-secondary:hover {
-  background: var(--bg);
+  background: var(--accent);
+  color: var(--text);
 }
 
 /* Disabled buttons shouldn't change colour on hover. */
 .btn:disabled:hover {
-  filter: none;
+  background: var(--primary);
+  box-shadow: none;
+}
+
+.btn-danger:disabled:hover {
+  background: var(--danger);
+}
+
+.btn-success:disabled:hover {
+  background: var(--success);
 }
 
 .btn-secondary:disabled:hover {
-  background: var(--white);
+  background: var(--surface);
 }
 
 /* ---------- Forms ---------- */
@@ -252,21 +641,35 @@ a {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .form-group label {
+  font-size: 15px;
   font-weight: 600;
 }
 
 input,
 select,
 textarea {
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  padding: 9px 12px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
   font: inherit;
-  background: var(--white);
+  color: var(--text);
+  background: var(--accent);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--primary);
 }
 
 input:focus,
@@ -274,12 +677,14 @@ select:focus,
 textarea:focus {
   outline: 2px solid var(--primary);
   outline-offset: -1px;
+  background: var(--surface);
 }
 
 /* FormInput sets aria-invalid when the field has an error. */
 input[aria-invalid='true'],
 textarea[aria-invalid='true'] {
   border-color: var(--danger);
+  background: var(--danger-soft);
 }
 
 .field-error {
@@ -301,20 +706,22 @@ textarea[aria-invalid='true'] {
 /* Error for the whole form, e.g. wrong email or password. */
 .alert-error {
   margin: 0 0 16px;
-  padding: 10px 12px;
-  border: 1px solid var(--danger);
-  border-radius: var(--radius);
-  background: #fef2f2;
-  color: var(--danger);
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-left: 4px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger-hover);
 }
 
 .alert-success {
   margin: 0 0 16px;
-  padding: 10px 12px;
-  border: 1px solid var(--success);
-  border-radius: var(--radius);
-  background: #f0fdf4;
-  color: var(--success);
+  padding: 12px 14px;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid var(--success);
+  border-radius: var(--radius-sm);
+  background: var(--success-soft);
+  color: var(--success-hover);
 }
 
 /* ---------- Spinner ---------- */
@@ -324,13 +731,13 @@ textarea[aria-invalid='true'] {
   justify-content: center;
   gap: 10px;
   padding: 48px 0;
-  color: var(--text-light);
+  color: var(--text-muted);
 }
 
 .spinner {
   width: 22px;
   height: 22px;
-  border: 3px solid var(--border);
+  border: 3px solid var(--accent);
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -344,42 +751,67 @@ textarea[aria-invalid='true'] {
 
 /* ---------- Badges ---------- */
 .badge {
-  display: inline-block;
-  padding: 2px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
   border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap; /* never break a status mid-word */
+  overflow-wrap: normal;
+}
+
+/* Small dot in the badge's text colour, so statuses are easy to tell apart at a glance. */
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .badge-available {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--badge-available-bg);
+  color: var(--badge-available-text);
 }
 
 .badge-borrowed {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--badge-borrowed-bg);
+  color: var(--badge-borrowed-text);
 }
 
 /* Request status colours (used by StatusBadge). */
 .badge-pending {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--badge-pending-bg);
+  color: var(--badge-pending-text);
 }
 
 .badge-approved {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--badge-approved-bg);
+  color: var(--badge-approved-text);
 }
 
 .badge-rejected {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--badge-rejected-bg);
+  color: var(--badge-rejected-text);
 }
 
 .badge-returned {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--badge-returned-bg);
+  color: var(--badge-returned-text);
+}
+
+/* Equipment active / inactive (Manage Equipment). */
+.badge-active {
+  background: var(--badge-active-bg);
+  color: var(--badge-active-text);
+}
+
+.badge-inactive {
+  background: var(--badge-inactive-bg);
+  color: var(--badge-inactive-text);
 }
 
 /* ---------- Catalogue ---------- */
@@ -388,6 +820,11 @@ textarea[aria-invalid='true'] {
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .filter-bar .form-group {
@@ -399,9 +836,94 @@ textarea[aria-invalid='true'] {
   flex: 2 1 240px;
 }
 
+/* On desktop these wrappers don't affect the layout: the three fields sit in the
+   filter bar's row as before, and the Filters button is hidden. */
+.filter-top,
+.filter-extra,
+.filter-extra-inner {
+  display: contents;
+}
+
+.filter-toggle {
+  display: none;
+}
+
+/* Mobile: search box + Filters button on one row; the dropdowns slide open below. */
+@media (max-width: 720px) {
+  .filter-bar {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .filter-top {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .filter-bar .filter-search {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .filter-toggle {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px; /* same height as the search box */
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
+  /* A dropdown filter is on: tint the button so it stands out. */
+  .filter-toggle-active,
+  .filter-toggle-active:hover {
+    border-color: var(--primary);
+    background: var(--accent);
+    color: var(--primary);
+  }
+
+  /* Collapsed to zero height; grows to full height when open. */
+  .filter-extra {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden; /* keeps the hidden dropdowns out of keyboard focus */
+    transition: grid-template-rows 0.25s ease, visibility 0s linear 0.25s;
+  }
+
+  .filter-extra-open {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition: grid-template-rows 0.25s ease;
+  }
+
+  .filter-extra-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .filter-bar .filter-extra-inner .form-group {
+    flex: none;
+  }
+
+  .filter-extra-inner .form-group:first-child {
+    margin-top: 12px; /* space under the search row, hidden with the panel */
+  }
+}
+
+@media (max-width: 720px) and (prefers-reduced-motion: reduce) {
+  .filter-extra {
+    transition: none;
+  }
+}
+
 .result-count {
   margin: 0 0 16px;
-  color: var(--text-light);
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -409,7 +931,7 @@ textarea[aria-invalid='true'] {
 .equipment-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 16px;
+  gap: 20px;
 }
 
 .equipment-card {
@@ -419,38 +941,49 @@ textarea[aria-invalid='true'] {
   gap: 8px;
   color: var(--text);
   text-decoration: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 
 .equipment-card:hover,
 .equipment-card:focus-visible {
+  color: var(--text);
   border-color: var(--primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* Name and category stay on one line; long text ends with "..." (full text on hover). */
+.equipment-card-name,
+.equipment-card-category {
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .equipment-card-name {
-  margin: 0;
   font-size: 18px;
 }
 
 .equipment-card-category {
-  margin: 0;
-  color: var(--text-light);
+  color: var(--text-muted);
 }
 
 .empty-message {
   text-align: center;
-  padding: 32px 16px;
+  padding: 40px 16px;
 }
 
 .empty-message p {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
 }
 
 /* ---------- Item Details ---------- */
 .back-link {
   display: inline-block;
   margin-bottom: 16px;
+  font-weight: 500;
   text-decoration: none;
 }
 
@@ -461,11 +994,11 @@ textarea[aria-invalid='true'] {
 .item-details,
 .item-request {
   max-width: 720px;
-  padding: 24px;
+  padding: 28px;
 }
 
 .item-details {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .item-details h1 {
@@ -474,7 +1007,7 @@ textarea[aria-invalid='true'] {
 
 .item-details-category {
   margin: 0 0 12px;
-  color: var(--text-light);
+  color: var(--text-muted);
 }
 
 .item-details-description {
@@ -488,10 +1021,12 @@ textarea[aria-invalid='true'] {
 /* Neutral message box, e.g. "log in to request". */
 .alert-info {
   margin: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg);
+  padding: 12px 14px;
+  border: 1px solid var(--accent);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--text);
 }
 
 /* ---------- My Requests ---------- */
@@ -501,21 +1036,36 @@ textarea[aria-invalid='true'] {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
+/* Item name and status badge share one line: a long name ends with "..." (full name on hover). */
 .request-card-header {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .request-card-name {
+  min-width: 0;
   margin: 0;
   font-size: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.request-card-header .badge {
+  flex-shrink: 0;
+}
+
+.request-card-details .request-card-date {
+  white-space: nowrap;
 }
 
 /* Purpose and return date: stacked on phones, side by side on wider screens. */
@@ -527,8 +1077,11 @@ textarea[aria-invalid='true'] {
 }
 
 .request-card-details dt {
-  color: var(--text-light);
-  font-size: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .request-card-details dd {
@@ -544,10 +1097,49 @@ textarea[aria-invalid='true'] {
 
 /* ---------- Data tables (Manage Equipment, Admin Dashboard) ---------- */
 .table-wrap {
-  background: var(--white);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
+  box-shadow: var(--shadow);
+  overflow-x: auto; /* safety net: scroll sideways rather than spill out if a row is ever too wide */
+}
+
+/* Admin Dashboard: "Showing X of Y" on the left, compact Status filter on the right. */
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.table-toolbar .result-count {
+  margin: 0;
+}
+
+.table-toolbar-filter {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-toolbar-filter select {
+  width: 220px;
+  background-color: var(--surface);
+  border-color: var(--border-strong);
+}
+
+@media (max-width: 720px) {
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-toolbar-filter select {
+    flex: 1;
+    width: auto;
+  }
 }
 
 .data-table {
@@ -557,17 +1149,27 @@ textarea[aria-invalid='true'] {
 
 .data-table th,
 .data-table td {
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: top;
 }
 
 .data-table th {
+  background: var(--accent);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.data-table tbody tr {
+  transition: background 0.15s;
+}
+
+.data-table tbody tr:hover {
   background: var(--bg);
-  color: var(--text-light);
-  font-size: 14px;
-  font-weight: 600;
 }
 
 .data-table tbody tr:last-child td {
@@ -575,12 +1177,27 @@ textarea[aria-invalid='true'] {
 }
 
 .data-table td {
-  overflow-wrap: anywhere; /* long text wraps instead of overflowing */
+  overflow-wrap: anywhere; /* Purpose/Description: long words wrap instead of overflowing */
+}
+
+/* Names in tables stay on one line and end with "..." past a max width; the
+   full text is in the title attribute, so it shows on hover. */
+.cell-truncate {
+  display: block;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* For the main column of a table (e.g. equipment Name), which has more room. */
+.cell-truncate-wide {
+  max-width: 360px;
 }
 
 /* Inactive equipment is shown greyed out. */
 .row-inactive td {
-  color: var(--text-light);
+  color: var(--text-muted);
 }
 
 .table-actions {
@@ -589,19 +1206,46 @@ textarea[aria-invalid='true'] {
   gap: 6px;
 }
 
-.action-note {
-  margin: 6px 0 0;
-  color: var(--text-light);
+/* Smaller buttons inside tables. */
+.data-table .btn-small {
+  padding: 4px 10px;
   font-size: 13px;
 }
 
 .action-none {
-  color: var(--text-light);
+  color: var(--text-muted);
   font-size: 14px;
+  white-space: nowrap;
 }
 
-/* Phones: each row becomes a small block of "Label: value" lines. */
-@media (max-width: 720px) {
+/* Desktop tables: "col-fit" columns shrink to their content and never wrap, so the
+   remaining column (Purpose / Name) takes all the spare width. */
+@media (min-width: 901px) {
+  .data-table .col-fit {
+    width: 1%;
+    white-space: nowrap;
+  }
+
+  .data-table .table-actions {
+    flex-wrap: nowrap;
+  }
+}
+
+/* Smaller laptops: tighter name caps so all columns still fit. */
+@media (max-width: 1024px) {
+  .cell-truncate {
+    max-width: 130px;
+  }
+
+  .cell-truncate-wide {
+    max-width: 220px;
+  }
+}
+
+/* Phones and tablets: each row becomes a small block of "Label: value" lines.
+   (Tables switch at 900px, wider than the 720px phone breakpoint, because six
+   columns can't fit side by side on a tablet-width screen.) */
+@media (max-width: 900px) {
   .data-table thead {
     display: none;
   }
@@ -615,7 +1259,7 @@ textarea[aria-invalid='true'] {
   }
 
   .data-table tr {
-    padding: 8px 0;
+    padding: 10px 0;
     border-bottom: 1px solid var(--border);
   }
 
@@ -625,16 +1269,27 @@ textarea[aria-invalid='true'] {
 
   .data-table td {
     display: grid;
-    grid-template-columns: 110px 1fr;
+    grid-template-columns: 110px minmax(0, 1fr); /* minmax lets long names truncate */
     gap: 8px;
-    padding: 6px 12px;
+    padding: 6px 14px;
     border-bottom: none;
+  }
+
+  /* Names use the full width of the row, still on one line with "...". */
+  .cell-truncate,
+  .cell-truncate-wide {
+    max-width: none;
+  }
+
+  /* Badges keep their natural width instead of stretching across the grid cell. */
+  .data-table td > .badge {
+    justify-self: start;
   }
 
   /* The label comes from each cell's data-label attribute. */
   .data-table td::before {
     content: attr(data-label);
-    color: var(--text-light);
+    color: var(--text-muted);
     font-size: 14px;
     font-weight: 600;
   }
@@ -649,14 +1304,76 @@ textarea[aria-invalid='true'] {
 }
 
 /* ---------- Manage Equipment ---------- */
+/* Same full width as the equipment table below it. */
 .manage-form-card {
-  max-width: 720px;
   margin-bottom: 24px;
-  padding: 24px;
+  padding: 28px;
 }
 
 .manage-form-card .form {
   max-width: none;
+}
+
+/* Add / Edit form:
+   Row 1: heading on the left, buttons on the right (Cancel, then Save last)
+   Row 2: Name | Category | Availability (3 equal columns)
+   Row 3: Description (full width) */
+.equipment-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 20px;
+  align-items: start;
+}
+
+.equipment-form-title {
+  margin: 0;
+  align-self: center;
+}
+
+.equipment-form .form-span-full {
+  grid-column: 1 / -1;
+}
+
+/* The buttons come last in the markup but are placed in the heading row here;
+   the heading takes the first two columns, so the fields start on row 2. */
+@media (min-width: 721px) {
+  .equipment-form-title {
+    grid-row: 1;
+    grid-column: 1 / 3;
+  }
+
+  .equipment-form .form-actions {
+    grid-row: 1;
+    grid-column: 3;
+    align-self: center;
+    justify-content: flex-end;
+  }
+}
+
+/* Inputs, dropdown and buttons share one exact height; buttons keep their normal width. */
+.equipment-form input,
+.equipment-form select,
+.equipment-form .form-actions .btn {
+  height: var(--control-height);
+}
+
+.equipment-form .form-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Phones: one column; the button(s) go full width under the dropdown. */
+@media (max-width: 720px) {
+  .equipment-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .equipment-form .form-actions .btn {
+    flex: 1;
+  }
 }
 
 .form-actions {
@@ -667,10 +1384,11 @@ textarea[aria-invalid='true'] {
 
 /* In-page delete confirm, shown under the item's row. */
 .confirm-box {
-  padding: 12px;
-  border: 1px solid var(--danger);
-  border-radius: var(--radius);
-  background: #fef2f2;
+  padding: 14px;
+  border: 1px solid #fecaca;
+  border-left: 4px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
 }
 
 .confirm-box p {
@@ -689,34 +1407,47 @@ textarea[aria-invalid='true'] {
 .stat-card {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  border-top: 4px solid var(--primary);
 }
 
 .stat-value {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 800;
   line-height: 1;
   color: var(--primary);
 }
 
 .stat-label {
-  color: var(--text-light);
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 /* ---------- Login / Signup ---------- */
 .auth-card {
   max-width: 460px;
   margin: 24px auto;
-  padding: 24px;
+  padding: 32px;
 }
 
 .auth-card .form {
   max-width: none;
 }
 
+.auth-card .btn[type='submit'] {
+  width: 100%;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
 .auth-switch {
-  margin: 16px 0 0;
-  color: var(--text-light);
+  margin: 20px 0 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.auth-switch a {
+  font-weight: 600;
 }
 
 /* ---------- Phones (about 480px and narrower) ---------- */
@@ -726,7 +1457,12 @@ textarea[aria-invalid='true'] {
   }
 
   .container {
-    padding-top: 16px;
+    padding-top: 20px;
+    padding-bottom: 32px;
+  }
+
+  .card {
+    padding: 16px;
   }
 
   /* Less padding so forms and details have more room. */
@@ -734,11 +1470,15 @@ textarea[aria-invalid='true'] {
   .item-details,
   .item-request,
   .manage-form-card {
-    padding: 16px;
+    padding: 18px;
   }
 
   .auth-card {
     margin: 8px auto;
+  }
+
+  .filter-bar {
+    padding: 12px;
   }
 
   /* Dashboard counts: 3 small cards in one row instead of 2 + 1. */
