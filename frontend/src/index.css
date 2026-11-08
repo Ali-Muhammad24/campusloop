@@ -32,6 +32,7 @@ h2,
 h3 {
   margin: 0 0 16px;
   line-height: 1.2;
+  overflow-wrap: anywhere; /* long names wrap instead of making the page scroll sideways */
 }
 
 h1 {
@@ -99,9 +100,70 @@ a {
   gap: 10px;
 }
 
+.navbar-user > span {
+  overflow-wrap: anywhere; /* long names wrap instead of overflowing */
+}
+
 .navbar-role {
   color: var(--text-light);
   font-size: 14px;
+}
+
+/* On wider screens the menu wrapper doesn't affect the layout: the links and the
+   user section sit in the navbar row exactly as before. */
+.navbar-menu {
+  display: contents;
+}
+
+/* The ☰ button only shows on small screens. */
+.navbar-toggle {
+  display: none;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.navbar-toggle:hover {
+  background: var(--bg);
+}
+
+/* Small screens: links, user name and Logout move into a menu that opens with ☰. */
+@media (max-width: 720px) {
+  .navbar-toggle {
+    display: block;
+  }
+
+  .navbar-menu {
+    display: none;
+    width: 100%; /* drops onto its own row under the brand and ☰ */
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .navbar-menu-open {
+    display: flex;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+  }
+
+  .navbar-link {
+    padding: 10px 12px; /* bigger tap area */
+  }
+
+  .navbar-user {
+    justify-content: space-between;
+    padding: 8px 12px 0;
+    border-top: 1px solid var(--border);
+  }
 }
 
 /* ---------- Page container ---------- */
@@ -223,6 +285,17 @@ textarea[aria-invalid='true'] {
 .field-error {
   color: var(--danger);
   font-size: 14px;
+}
+
+/* Long words (emails, item names) in messages and cards wrap instead of overflowing. */
+.alert-error,
+.alert-success,
+.alert-info,
+.confirm-box,
+.empty-message,
+.equipment-card,
+.item-details-description {
+  overflow-wrap: anywhere;
 }
 
 /* Error for the whole form, e.g. wrong email or password. */
@@ -644,4 +717,46 @@ textarea[aria-invalid='true'] {
 .auth-switch {
   margin: 16px 0 0;
   color: var(--text-light);
+}
+
+/* ---------- Phones (about 480px and narrower) ---------- */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 24px;
+  }
+
+  .container {
+    padding-top: 16px;
+  }
+
+  /* Less padding so forms and details have more room. */
+  .auth-card,
+  .item-details,
+  .item-request,
+  .manage-form-card {
+    padding: 16px;
+  }
+
+  .auth-card {
+    margin: 8px auto;
+  }
+
+  /* Dashboard counts: 3 small cards in one row instead of 2 + 1. */
+  .stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 12px 8px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+  }
 }
