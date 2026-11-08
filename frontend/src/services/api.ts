@@ -4,6 +4,7 @@
 
 import type { User, SafeUser, Equipment, BorrowRequest } from '../types';
 import { dummyUsers, dummyEquipment, dummyRequests } from '../data/dummyData';
+import { validateFutureDate, validateRequired } from '../utils/validation';
 
 const DELAY_MS = 500;
 
@@ -85,7 +86,12 @@ export async function addEquipment(data: Omit<Equipment, 'id'>): Promise<Equipme
 
 export async function updateEquipment(id: number, data: Omit<Equipment, 'id'>): Promise<Equipment> {
   await wait();
-  findEquipment(id);
+  const current = findEquipment(id);
+  // A lent-out item only becomes Available through Mark Returned. Otherwise it could be lent twice.
+  const onLoan = requests.some((r) => r.equipmentId === id && r.status === 'Approved');
+  if (onLoan && current.availability === 'Borrowed' && data.availability === 'Available') {
+    throw new Error('This item is on loan. Use Mark Returned on the Admin Dashboard.');
+  }
   const updated: Equipment = { ...data, id };
   equipment = equipment.map((e) => (e.id === id ? updated : e));
   return { ...updated };
@@ -120,6 +126,9 @@ export async function createRequest(
   expectedReturnDate: string,
 ): Promise<BorrowRequest> {
   await wait();
+  // Same checks as the request form, so a bad request is refused here too.
+  const inputError = validateRequired(purpose, 'Purpose') ?? validateFutureDate(expectedReturnDate);
+  if (inputError) throw new Error(inputError);
   const item = findEquipment(equipmentId);
   if (!item.isActive || item.availability !== 'Available') {
     throw new Error('This item is not available right now.');
