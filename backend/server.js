@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const connectDB = require('./config/db');
 
 const app = express();
 
@@ -21,6 +22,14 @@ app.get('/api/health', (req, res) => {
   res.json({ message: 'CampusLoop API is running' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Connect to the database first, then start accepting requests.
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Could not connect to MongoDB:', error.message);
+    process.exit(1);
+  });
