@@ -4,7 +4,9 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const session = require('express-session');
 const connectDB = require('./config/db');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -17,10 +19,26 @@ app.use(cors({ origin: CLIENT_URL, credentials: true }));
 // Read JSON request bodies into req.body.
 app.use(express.json());
 
+// Sessions keep users logged in. The session data stays on the server and the browser
+// only stores a cookie with the session id.
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'campusloop-dev-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true, // JavaScript in the browser cannot read the cookie
+      maxAge: 1000 * 60 * 60 * 24, // one day
+    },
+  }),
+);
+
 // Simple route to check that the server is running.
 app.get('/api/health', (req, res) => {
   res.json({ message: 'CampusLoop API is running' });
 });
+
+app.use('/api/auth', authRoutes);
 
 // Connect to the database first, then start accepting requests.
 connectDB()
