@@ -7,6 +7,7 @@ const cors = require('cors');
 const session = require('express-session');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
+const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
@@ -39,6 +40,10 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+
+// These two must come after all the routes.
+app.use(notFound);
+app.use(errorHandler);
 
 // Connect to the database first, then start accepting requests.
 connectDB()

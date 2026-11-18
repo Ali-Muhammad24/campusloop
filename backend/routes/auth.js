@@ -3,6 +3,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const { requireLogin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -60,7 +61,7 @@ router.post('/login', async (req, res) => {
 });
 
 // POST /api/auth/logout
-router.post('/logout', (req, res, next) => {
+router.post('/logout', requireLogin, (req, res, next) => {
   req.session.destroy((error) => {
     if (error) return next(error);
     res.clearCookie('connect.sid');
@@ -70,9 +71,7 @@ router.post('/logout', (req, res, next) => {
 
 // GET /api/auth/me
 // Returns the logged-in user. The frontend calls this on page load to restore the login.
-router.get('/me', async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ message: 'Please log in first.' });
-
+router.get('/me', requireLogin, async (req, res) => {
   const user = await User.findById(req.session.userId);
   if (!user) return res.status(401).json({ message: 'Please log in first.' });
 
