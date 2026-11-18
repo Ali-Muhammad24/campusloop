@@ -7,6 +7,7 @@ const cors = require('cors');
 const session = require('express-session');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
+const equipmentRoutes = require('./routes/equipment');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -40,6 +41,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/equipment', equipmentRoutes);
 
 // These two must come after all the routes.
 app.use(notFound);
