@@ -7,8 +7,7 @@ import * as api from '../services/api';
 // The form a Student fills in to borrow an item. New requests start as Pending.
 
 interface RequestFormProps {
-  itemId: number;
-  studentId: number;
+  itemId: string;
 }
 
 interface RequestValues {
@@ -18,7 +17,7 @@ interface RequestValues {
 
 type RequestErrors = Partial<Record<keyof RequestValues, string>>;
 
-function RequestForm({ itemId, studentId }: RequestFormProps) {
+function RequestForm({ itemId }: RequestFormProps) {
   const [values, setValues] = useState<RequestValues>({ purpose: '', expectedReturnDate: '' });
   const [errors, setErrors] = useState<RequestErrors>({});
   const [submitError, setSubmitError] = useState('');
@@ -44,7 +43,7 @@ function RequestForm({ itemId, studentId }: RequestFormProps) {
 
     setLoading(true);
     try {
-      await api.createRequest(studentId, itemId, values.purpose, values.expectedReturnDate);
+      await api.createRequest(itemId, values.purpose, values.expectedReturnDate);
       setSuccess(true);
     } catch (error) {
       // The form keeps what the user typed, so they can try again.

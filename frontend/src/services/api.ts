@@ -1,183 +1,122 @@
-// Mock API service. Pages call these functions instead of touching dummy data directly.
-// Later, each function body can be replaced with a real API call (e.g. axios) without
-// changing the pages. Changes are kept in memory, so they reset when the page is refreshed.
+// API service. Pages call these functions instead of using axios directly,
+// so this is the only file that knows the backend's URLs.
 
-import type { User, SafeUser, Equipment, BorrowRequest } from '../types';
-import { dummyUsers, dummyEquipment, dummyRequests } from '../data/dummyData';
-import { validateFutureDate, validateRequired } from '../utils/validation';
+import axios from 'axios';
+import type { SafeUser, Equipment, BorrowRequest } from '../types';
 
-const DELAY_MS = 500;
+const http = axios.create({
+  baseURL: 'http://localhost:5000/api',
+  // Send the session cookie with every request, so the backend knows who is logged in.
+  withCredentials: true,
+});
 
-// Copies so the original dummy data is never changed.
-let users: User[] = dummyUsers.map((u) => ({ ...u }));
-let equipment: Equipment[] = dummyEquipment.map((e) => ({ ...e }));
-let requests: BorrowRequest[] = dummyRequests.map((r) => ({ ...r }));
-
-// Waits a little, like a real network call, so loading indicators can be shown.
-function wait(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, DELAY_MS));
-}
-
-function nextId(items: { id: number }[]): number {
-  return items.length === 0 ? 1 : Math.max(...items.map((i) => i.id)) + 1;
-}
-
-function removePassword(user: User): SafeUser {
-  const { password: _password, ...safeUser } = user;
-  return safeUser;
-}
-
-function findEquipment(id: number): Equipment {
-  const item = equipment.find((e) => e.id === id);
-  if (!item) throw new Error('Equipment not found.');
-  return item;
-}
-
-function findRequest(id: number): BorrowRequest {
-  const request = requests.find((r) => r.id === id);
-  if (!request) throw new Error('Request not found.');
-  return request;
-}
+// The backend sends errors as { message: "..." }. This turns a failed call into a normal
+// Error with that message, so pages can show error.message as before.
+http.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (axios.isAxiosError(error)) {
+      const message = error.response?.data?.message;
+      if (typeof message === 'string') return Promise.reject(new Error(message));
+      return Promise.reject(new Error('Could not reach the server. Please check that it is running.'));
+    }
+    return Promise.reject(error);
+  },
+);
 
 // ---------- Auth ----------
 
 export async function login(email: string, password: string): Promise<SafeUser> {
-  await wait();
-  const user = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password);
-  if (!user) throw new Error('Incorrect email or password.');
-  return removePassword(user);
+  const response = await http.post<SafeUser>('/auth/login', { email, password });
+  return response.data;
 }
 
-// Signup always creates a Student account.
+// Signup always creates a Student account (the backend decides the role).
 export async function signup(name: string, email: string, password: string): Promise<SafeUser> {
-  await wait();
-  const cleanEmail = email.trim().toLowerCase();
-  if (users.some((u) => u.email.toLowerCase() === cleanEmail)) {
-    throw new Error('An account with this email already exists.');
-  }
-  const newUser: User = { id: nextId(users), name: name.trim(), email: cleanEmail, password, role: 'Student' };
-  users = [...users, newUser];
-  return removePassword(newUser);
+  const response = await http.post<SafeUser>('/auth/signup', { name, email, password });
+  return response.data;
 }
 
-export async function getUsers(): Promise<SafeUser[]> {
-  await wait();
-  return users.map(removePassword);
+export async function logout(): Promise<void> {
+  await http.post('/auth/logout');
+}
+
+// Returns the logged-in user, or null when nobody is logged in.
+// Used when the app starts, to restore the login from the session cookie.
+export async function getCurrentUser(): Promise<SafeUser | null> {
+  try {
+    const response = await http.get<SafeUser>('/auth/me');
+    return response.data;
+  } catch {
+    return null;
+  }
 }
 
 // ---------- Equipment ----------
 
+// Students and guests receive active items only. The Admin also receives inactive ones.
 export async function getEquipment(): Promise<Equipment[]> {
-  await wait();
-  return equipment.map((e) => ({ ...e }));
+  const response = await http.get<Equipment[]>('/equipment');
+  return response.data;
 }
 
-export async function getEquipmentById(id: number): Promise<Equipment> {
-  await wait();
-  return { ...findEquipment(id) };
+export async function getEquipmentById(id: string): Promise<Equipment> {
+  const response = await http.get<Equipment>(`/equipment/${id}`);
+  return response.data;
 }
 
 export async function addEquipment(data: Omit<Equipment, 'id'>): Promise<Equipment> {
-  await wait();
-  const newItem: Equipment = { ...data, id: nextId(equipment) };
-  equipment = [...equipment, newItem];
-  return { ...newItem };
+  const response = await http.post<Equipment>('/equipment', data);
+  return response.data;
 }
 
-export async function updateEquipment(id: number, data: Omit<Equipment, 'id'>): Promise<Equipment> {
-  await wait();
-  const current = findEquipment(id);
-  // A lent-out item only becomes Available through Mark Returned. Otherwise it could be lent twice.
-  const onLoan = requests.some((r) => r.equipmentId === id && r.status === 'Approved');
-  if (onLoan && current.availability === 'Borrowed' && data.availability === 'Available') {
-    throw new Error('This item is on loan. Use Mark Returned on the Admin Dashboard.');
-  }
-  const updated: Equipment = { ...data, id };
-  equipment = equipment.map((e) => (e.id === id ? updated : e));
-  return { ...updated };
+export async function updateEquipment(id: string, data: Omit<Equipment, 'id'>): Promise<Equipment> {
+  const response = await http.put<Equipment>(`/equipment/${id}`, data);
+  return response.data;
 }
 
-// Items that already have requests can't be deleted; mark them inactive instead.
-export async function deleteEquipment(id: number): Promise<void> {
-  await wait();
-  findEquipment(id);
-  if (requests.some((r) => r.equipmentId === id)) {
-    throw new Error('This item has requests, so it cannot be deleted. Mark it inactive instead.');
-  }
-  equipment = equipment.filter((e) => e.id !== id);
+// Items that already have requests can't be deleted; the backend refuses with a message.
+export async function deleteEquipment(id: string): Promise<void> {
+  await http.delete(`/equipment/${id}`);
 }
 
 // ---------- Requests ----------
 
+// All requests (Admin only).
 export async function getRequests(): Promise<BorrowRequest[]> {
-  await wait();
-  return requests.map((r) => ({ ...r }));
+  const response = await http.get<BorrowRequest[]>('/requests');
+  return response.data;
 }
 
-export async function getRequestsByStudent(studentId: number): Promise<BorrowRequest[]> {
-  await wait();
-  return requests.filter((r) => r.studentId === studentId).map((r) => ({ ...r }));
+// The logged-in student's own requests.
+export async function getMyRequests(): Promise<BorrowRequest[]> {
+  const response = await http.get<BorrowRequest[]>('/requests/mine');
+  return response.data;
 }
 
+// The backend takes the student from the session, so only the item and the form values are sent.
 export async function createRequest(
-  studentId: number,
-  equipmentId: number,
+  equipmentId: string,
   purpose: string,
   expectedReturnDate: string,
 ): Promise<BorrowRequest> {
-  await wait();
-  // Same checks as the request form, so a bad request is refused here too.
-  const inputError = validateRequired(purpose, 'Purpose') ?? validateFutureDate(expectedReturnDate);
-  if (inputError) throw new Error(inputError);
-  const item = findEquipment(equipmentId);
-  if (!item.isActive || item.availability !== 'Available') {
-    throw new Error('This item is not available right now.');
-  }
-  const newRequest: BorrowRequest = {
-    id: nextId(requests),
-    studentId,
-    equipmentId,
-    purpose: purpose.trim(),
-    expectedReturnDate,
-    status: 'Pending',
-  };
-  requests = [...requests, newRequest];
-  return { ...newRequest };
+  const response = await http.post<BorrowRequest>('/requests', { equipmentId, purpose, expectedReturnDate });
+  return response.data;
 }
 
-function setStatus(id: number, status: BorrowRequest['status']): BorrowRequest {
-  const updated: BorrowRequest = { ...findRequest(id), status };
-  requests = requests.map((r) => (r.id === id ? updated : r));
-  return { ...updated };
+// Approving marks the item Borrowed.
+export async function approveRequest(id: string): Promise<BorrowRequest> {
+  const response = await http.patch<BorrowRequest>(`/requests/${id}/approve`);
+  return response.data;
 }
 
-function setAvailability(equipmentId: number, availability: Equipment['availability']): void {
-  equipment = equipment.map((e) => (e.id === equipmentId ? { ...e, availability } : e));
-}
-
-// Approving marks the item Borrowed. An item that is already Borrowed can't be approved again.
-export async function approveRequest(id: number): Promise<BorrowRequest> {
-  await wait();
-  const request = findRequest(id);
-  if (request.status !== 'Pending') throw new Error('Only pending requests can be approved.');
-  if (findEquipment(request.equipmentId).availability === 'Borrowed') {
-    throw new Error('This item is currently borrowed. Wait until it is returned.');
-  }
-  setAvailability(request.equipmentId, 'Borrowed');
-  return setStatus(id, 'Approved');
-}
-
-export async function rejectRequest(id: number): Promise<BorrowRequest> {
-  await wait();
-  if (findRequest(id).status !== 'Pending') throw new Error('Only pending requests can be rejected.');
-  return setStatus(id, 'Rejected');
+export async function rejectRequest(id: string): Promise<BorrowRequest> {
+  const response = await http.patch<BorrowRequest>(`/requests/${id}/reject`);
+  return response.data;
 }
 
 // Marking returned makes the item Available again.
-export async function markReturned(id: number): Promise<BorrowRequest> {
-  await wait();
-  const request = findRequest(id);
-  if (request.status !== 'Approved') throw new Error('Only approved requests can be marked returned.');
-  setAvailability(request.equipmentId, 'Available');
-  return setStatus(id, 'Returned');
+export async function markReturned(id: string): Promise<BorrowRequest> {
+  const response = await http.patch<BorrowRequest>(`/requests/${id}/return`);
+  return response.data;
 }

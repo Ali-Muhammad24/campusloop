@@ -2,15 +2,15 @@
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { Role, SafeUser } from '../types';
-import { loadUser } from '../services/authStorage';
 
 interface AuthState {
   user: SafeUser | null;
 }
 
-// Start with the saved login (if any), so a page refresh keeps the user logged in.
+// Nobody is logged in at first. main.tsx asks the backend who is logged in
+// (using the session cookie) before the app is shown, so a refresh keeps the login.
 const initialState: AuthState = {
-  user: loadUser(),
+  user: null,
 };
 
 const authSlice = createSlice({

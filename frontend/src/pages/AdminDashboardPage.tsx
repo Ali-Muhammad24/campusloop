@@ -18,25 +18,22 @@ interface Message {
 function AdminDashboardPage() {
   const [requests, setRequests] = useState<BorrowRequest[]>([]);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
-  // Student id -> name, so each request can show who made it.
-  const [studentNames, setStudentNames] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
   const [message, setMessage] = useState<Message | null>(null);
-  const [busyId, setBusyId] = useState<number | null>(null); // request whose button is being processed
+  const [busyId, setBusyId] = useState<string | null>(null); // request whose button is being processed
 
   useEffect(() => {
     let ignore = false;
 
-    Promise.all([api.getRequests(), api.getEquipment(), api.getUsers()])
-      .then(([allRequests, allEquipment, users]) => {
+    // Requests arrive newest first and already include the student and item names.
+    Promise.all([api.getRequests(), api.getEquipment()])
+      .then(([allRequests, allEquipment]) => {
         if (ignore) return;
-        // Newest first (higher id = created later).
-        setRequests([...allRequests].sort((a, b) => b.id - a.id));
+        setRequests(allRequests);
         setEquipment(allEquipment);
-        setStudentNames(Object.fromEntries(users.map((user) => [user.id, user.name])));
       })
       .catch((error: unknown) => {
         if (!ignore) setLoadError(error instanceof Error ? error.message : 'Could not load the dashboard.');
@@ -50,7 +47,7 @@ function AdminDashboardPage() {
     };
   }, []);
 
-  function findItem(equipmentId: number): Equipment | undefined {
+  function findItem(equipmentId: string): Equipment | undefined {
     return equipment.find((item) => item.id === equipmentId);
   }
 
@@ -60,8 +57,8 @@ function AdminDashboardPage() {
     setMessage(null);
     setBusyId(request.id);
 
-    const studentName = studentNames[request.studentId] ?? 'the student';
-    const itemName = findItem(request.equipmentId)?.name ?? 'the item';
+    const studentName = request.studentName;
+    const itemName = request.equipmentName;
 
     try {
       let updated: BorrowRequest;
@@ -196,8 +193,8 @@ function AdminDashboardPage() {
                     // Another request already has this item, so this one can't be approved yet.
                     const itemBorrowed = item?.availability === 'Borrowed';
                     const anyBusy = busyId !== null;
-                    const studentName = studentNames[request.studentId] ?? 'Unknown student';
-                    const itemName = item?.name ?? 'Unknown item';
+                    const studentName = request.studentName;
+                    const itemName = request.equipmentName;
 
                     return (
                       <tr key={request.id}>

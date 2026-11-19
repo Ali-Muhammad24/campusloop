@@ -8,16 +8,16 @@ import Spinner from '../components/Spinner';
 import RequestForm from '../components/RequestForm';
 
 function ItemDetailsPage() {
-  // Reads the item id from the URL, e.g. /equipment/3 gives id = "3".
+  // Reads the item id from the URL, e.g. /equipment/6af9... gives that id.
   const { id } = useParams();
-  const itemId = Number(id);
-  const validId = Number.isInteger(itemId) && itemId > 0;
+  const itemId = id ?? '';
+  const validId = itemId !== '';
 
   const user = useAppSelector(selectUser);
 
   // The loaded item, together with the id it was loaded for (item is null if it wasn't found).
   // "error" is set when loading failed for another reason, e.g. a network problem.
-  const [result, setResult] = useState<{ id: number; item: Equipment | null; error?: string } | null>(null);
+  const [result, setResult] = useState<{ id: string; item: Equipment | null; error?: string } | null>(null);
 
   // Still loading until we have a result for the id that is in the URL right now.
   const loading = validId && result?.id !== itemId;
@@ -101,7 +101,7 @@ function ItemDetailsPage() {
     requestSection = <p className="alert-info">Only students can request equipment.</p>;
   } else {
     // "key" gives a fresh, empty form if the user opens a different item.
-    requestSection = <RequestForm key={item.id} itemId={item.id} studentId={user.id} />;
+    requestSection = <RequestForm key={item.id} itemId={item.id} />;
   }
 
   return (

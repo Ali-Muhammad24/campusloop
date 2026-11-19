@@ -6,19 +6,18 @@ export type Availability = 'Available' | 'Borrowed';
 
 export type RequestStatus = 'Pending' | 'Approved' | 'Rejected' | 'Returned';
 
-export interface User {
-  id: number;
+// Ids are strings because MongoDB ids look like "6af9c1f5c70a58608c05eccc".
+
+// The logged-in user. The backend never sends the password.
+export interface SafeUser {
+  id: string;
   name: string;
   email: string;
-  password: string;
   role: Role;
 }
 
-// The logged-in user without the password (this is what we keep in Redux).
-export type SafeUser = Omit<User, 'password'>;
-
 export interface Equipment {
-  id: number;
+  id: string;
   name: string;
   category: string;
   description: string;
@@ -27,10 +26,13 @@ export interface Equipment {
 }
 
 // Named BorrowRequest because "Request" is already a built-in browser type.
+// The backend also sends the student's and the item's name with each request.
 export interface BorrowRequest {
-  id: number;
-  studentId: number;
-  equipmentId: number;
+  id: string;
+  studentId: string;
+  studentName: string;
+  equipmentId: string;
+  equipmentName: string;
   purpose: string;
   expectedReturnDate: string; // format: YYYY-MM-DD
   status: RequestStatus;

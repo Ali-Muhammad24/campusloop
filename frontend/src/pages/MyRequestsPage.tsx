@@ -14,8 +14,6 @@ function MyRequestsPage() {
   const userId = user?.id;
 
   const [requests, setRequests] = useState<BorrowRequest[]>([]);
-  // Equipment id -> name, so each request can show the item's name.
-  const [equipmentNames, setEquipmentNames] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
@@ -23,13 +21,11 @@ function MyRequestsPage() {
     if (userId === undefined) return;
     let ignore = false;
 
-    // Load both at the same time instead of one after the other.
-    Promise.all([api.getRequestsByStudent(userId), api.getEquipment()])
-      .then(([myRequests, equipment]) => {
-        if (ignore) return;
-        // Newest first (higher id = created later).
-        setRequests([...myRequests].sort((a, b) => b.id - a.id));
-        setEquipmentNames(Object.fromEntries(equipment.map((item) => [item.id, item.name])));
+    // The backend returns only this student's requests, newest first.
+    api
+      .getMyRequests()
+      .then((myRequests) => {
+        if (!ignore) setRequests(myRequests);
       })
       .catch((error: unknown) => {
         if (!ignore) setLoadError(error instanceof Error ? error.message : 'Could not load your requests.');
@@ -67,7 +63,7 @@ function MyRequestsPage() {
       ) : (
         <ul className="request-list">
           {requests.map((request) => {
-            const itemName = equipmentNames[request.equipmentId] ?? 'Unknown item';
+            const itemName = request.equipmentName;
             return (
               <li key={request.id} className="card request-card">
                 <div className="request-card-header">

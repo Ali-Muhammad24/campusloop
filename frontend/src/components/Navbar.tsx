@@ -2,6 +2,7 @@ import { useEffect, useState, type ComponentType } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logout, selectUser } from '../store/authSlice';
+import * as api from '../services/api';
 import {
   CatalogueIcon,
   CloseIcon,
@@ -50,8 +51,14 @@ function Navbar() {
     setMenuOpen(false);
   }
 
-  function handleLogout() {
+  async function handleLogout() {
     closeMenu();
+    try {
+      // End the session on the backend, so the cookie stops working.
+      await api.logout();
+    } catch {
+      // Even if the server can't be reached, log out on this side.
+    }
     dispatch(logout());
     navigate('/login');
   }

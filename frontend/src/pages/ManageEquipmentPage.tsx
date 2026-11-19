@@ -33,15 +33,15 @@ function errorText(error: unknown, fallback: string): string {
 function ManageEquipmentPage() {
   const [items, setItems] = useState<Equipment[]>([]);
   // Ids of items that have at least one request (those can't be deleted).
-  const [itemIdsWithRequests, setItemIdsWithRequests] = useState<Set<number>>(new Set());
+  const [itemIdsWithRequests, setItemIdsWithRequests] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
   const [message, setMessage] = useState<Message | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0); // changing it empties the Add form
   const [saving, setSaving] = useState(false);
-  const [busyId, setBusyId] = useState<number | null>(null); // item whose button is being processed
+  const [busyId, setBusyId] = useState<string | null>(null); // item whose button is being processed
   const [deleteCheck, setDeleteCheck] = useState<DeleteCheck | null>(null);
 
   useEffect(() => {
